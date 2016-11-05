@@ -40,7 +40,7 @@ function la_NBM(g::SimpleGraph)
     end
 
 
-    B = zeros(Float64, m, m)
+    B = spzeros(Float64, m, m)
 
 
     for (e,u) in edgeidmap

@@ -12,27 +12,40 @@ function la_matriz(g)
     for n in 1:nv(g)
         D[n,n] = degree(g,n)-1
     end
-    hcat(vcat(ceros,menos),vcat(D,A))
+    sparse(hcat(vcat(ceros,menos),vcat(D,A)))
 end
 
 M = la_matriz(g)
-valores = eigvals(M)
+valores, vectores = eigs(M, nev=20)
 treshold = real(sqrt(valores[1]))
+if real(last(valores)) > treshold
+    valores, vectores = eigs(M, nev=30)
+    if real(last(valores)) > treshold
+        valores, vectores = eigs(M, nev=40)
+        if real(last(valores)) > treshold
+            valores, vectores = eigs(M, nev=50)
+            if real(last(valores)) > treshold
+                valores, vectores = eigs(M, nev=nv(g))
+            end
+        end
+    end
+end
 
-mmm = eigvals(M)
+
+#mmm = eigvals(M)
 
 cuantos = Array(Float64,0)
 index = Array(Int64,0)
-for i in 1:length(mmm)
-    if imag(mmm[i]) == 0 && real(mmm[i]) > treshold
-        push!(cuantos,real(mmm[i]))
+for i in 1:length(valores)
+    if imag(valores[i]) == 0 && real(valores[i]) > treshold
+        push!(cuantos,real(valores[i]))
         push!(index,i)
     end
 end
 
 print("There are $(length(cuantos)) communities in this Network \n")
 
-matriz_embedded = real(eigvecs(M)[:,index])
+matriz_embedded = real(vectores[:,index])
 arriba = matriz_embedded[1:nv(g),:]
 abajo = matriz_embedded[nv(g)+1:2*nv(g),:]
 hola = arriba + abajo
