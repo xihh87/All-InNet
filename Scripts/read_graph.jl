@@ -17,7 +17,7 @@ end
 
 a = ext(exten)
 
-graph_files = Dict{ASCIIString,Int64}([a[i]=>i for i in 1:length(a)])
+graph_files = Dict{String,Int64}(Dict(a[i]=>i for i in 1:length(a)))
 print("\n")
 print("Give the index of the file that contains the network to analize \n \n")
 
@@ -61,7 +61,7 @@ if typeof(red[1,i]) != Int
   Nodes = red[:,[i,j]]
   Nodes = unique(Nodes)
   #weight = red[:,2]
-  dic_nodes = Dict{ASCIIString,Int64}([Nodes[i]=>i for i in 1:length(Nodes)])
+  dic_nodes = Dict{String,Int64}(Dict(Nodes[i]=>i for i in 1:length(Nodes)))
   g = Graph()
   last_node = Int64(length(Nodes))
   add_vertices!(g,last_node)
