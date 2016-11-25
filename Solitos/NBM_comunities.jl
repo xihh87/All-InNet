@@ -1,9 +1,23 @@
+#!/usr/bin/env julia
+
 using LightGraphs
 using RCall
+using ArgParse
 
+parser = ArgParseSettings(description = "Find communities using Non Backtracking Matrix algorithm.")
 
-red = readdlm("aqui_va_la_red.dat")
+@add_arg_table parser begin
+    "--output", "-o"
+    "file"
+end
+
+args = parse_args(s)
+
+output_file = get(args, "output", STDOUT)
+
+red = readdlm(args["file"])
 g = Graph()
+
 ultimovertice = Int64(maximum(red))
 add_vertices!(g,ultimovertice)
 for n in 1:Int64((length(red)/2))
@@ -85,6 +99,5 @@ else
 end
 
 print("Your results will be saved as: NBM_communities_$(a[k]) \n")
-writedlm("../Resultados/NBM_communities_$(a[k])",comunidades)
 
-
+writedlm(output_file, comunidades)
