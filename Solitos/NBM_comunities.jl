@@ -2,7 +2,7 @@ using LightGraphs
 using RCall
 
 
-red = readdlm("zacharykarateclub.dat")
+red = readdlm("../Redes/*.dat")
 g = Graph()
 ultimovertice = Int64(maximum(red))
 add_vertices!(g,ultimovertice)
