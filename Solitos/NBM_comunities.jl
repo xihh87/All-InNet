@@ -1,8 +1,23 @@
 using LightGraphs
 using RCall
 
+exten = r".dat"
 
-red = readdlm("aqui_va_la_red.dat")
+function ext(v::Regex)
+  valid = Array(Any,0)
+  for i in readdir("../Redes")
+    if match(v,i) != nothing
+      push!(valid,i)
+    end
+  end
+  valid
+end
+
+a = ext(exten)
+
+for la_red in a
+
+red = readdlm(la_red)
 g = Graph()
 ultimovertice = Int64(maximum(red))
 add_vertices!(g,ultimovertice)
@@ -47,7 +62,6 @@ for i in 1:length(valores)
     end
 end
 
-print("There are $(length(cuantos)) communities in this Network \n")
 
 matriz_embedded = real(vectores[:,index])
 arriba = matriz_embedded[1:nv(g),:]
@@ -78,13 +92,12 @@ end
 
 grupos = membresia(length(index),hola)
 
-if typeof(red[1,1]) != Int
-  comunidades = hcat(Nodes,grupos)
-else
-  comunidades = hcat(vertices(g),grupos)
-end
+comunidades = hcat(vertices(g),grupos)
 
-print("Your results will be saved as: NBM_communities_$(a[k]) \n")
-writedlm("../Resultados/NBM_communities_$(a[k])",comunidades)
+
+#print("$(length(cuantos))")
+
+writedlm("../Resultados/NBM_communities_$(la_red)",comunidades)
+end
 
 
