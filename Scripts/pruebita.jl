@@ -14,32 +14,28 @@ end
 
 function la_NBM(g::SimpleGraph)
     edgeidmap = Dict{Edge, Int}()
+    aristas = ne(g)
     m = 0
     for e in edges(g)
         m += 1
         edgeidmap[e] = m
+	edgeidmap[reverse(e)] = m + aristas
     end
 
-    if !is_directed(g)
-        for e in edges(g)
-            m += 1
-            edgeidmap[reverse(e)] = m
-        end
-    end
-
-
-    B = spzeros(Float64, m, m)
+    B = spzeros(Float64, 2*aristas, 2*aristas)
 
 
     for (e,u) in edgeidmap
         i, j = src(e), dst(e)
-        for (e2,v) in edgeidmap
-          k, l = src(e2), dst(e2)
-          B[v,u] = (kron_δ(j,k)*(1-kron_δ(i,l)))*(1/(degree(g,j)))
+	eles = neighbors(g,j)
+	k = j
+        for l in eles
+          B[edgeidmap[k=>l],u] = (kron_δ(j,k)*(1-kron_δ(i,l)))*(1/(degree(g,j)))
         end
     end
     return B, edgeidmap
 end
+
 
 function contrae(g,v)
     y = zeros(Float64, nv(g))
@@ -84,11 +80,15 @@ end
 treshold = sqrt(mean(grados)/mean(grados.-1)/mean(grados))
 #treshold = sqrt(mean(grados./(grados.-1))/mean(grados))
 NB1,NB2 = la_NBM(g)
-unos = ones(2ne(g))/sqrt(2ne(g))
-unnos = unos*unos'
-R = NB1 - unnos
+#unos = ones(2ne(g))/sqrt(2ne(g))
+#unnos = unos*unos'
 
-M = R
+hola = zeros(Float64, nv(g), nv(g))
+for n in 1:nv(g)
+    hola[:,n] = contrae(g,NB1)
+end
+
+M = hola
 valores, vectores = eigs(M, nev=20)
 if real(last(valores)) > treshold
     valores, vectores = eigs(M, nev=30)
@@ -116,10 +116,10 @@ print("There are $(length(cuantos)+1) communities in this Network \n")
 
 matriz_embedded = real(vectores[:,index])
 
-hola = zeros(Float64, nv(g), length(index))
-for n in 1:length(index)
-    hola[:,n] = contrae(g,matriz_embedded)
-end
+#hola = zeros(Float64, nv(g), length(index))
+#for n in 1:length(index)
+#    hola[:,n] = contrae(g,matriz_embedded)
+#end
 
 R_kmeans = R"kmeans"
 
@@ -143,7 +143,7 @@ function membresia(n,v)
     membresia
 end
 
-grupos = membresia(length(index)+1,hola)
+grupos = membresia(length(index)+1,matriz_embedded)
 
 if typeof(red[1,1]) != Int
   comunidades = hcat(Nodes,grupos)

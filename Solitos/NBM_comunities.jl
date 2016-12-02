@@ -1,23 +1,11 @@
+#!/usr/bin/env julia
+
 using LightGraphs
 using RCall
 
-exten = r".dat"
+a = ARGS
+readdlm(a[1])
 
-function ext(v::Regex)
-  valid = Array(Any,0)
-  for i in readdir("../Redes")
-    if match(v,i) != nothing
-      push!(valid,i)
-    end
-  end
-  valid
-end
-
-a = ext(exten)
-
-for la_red in a
-
-red = readdlm(la_red)
 g = Graph()
 ultimovertice = Int64(maximum(red))
 add_vertices!(g,ultimovertice)
@@ -53,6 +41,8 @@ if real(last(valores)) > treshold
 end
 
 
+#mmm = eigvals(M)
+
 cuantos = Array(Float64,0)
 index = Array(Int64,0)
 for i in 1:length(valores)
@@ -61,7 +51,6 @@ for i in 1:length(valores)
         push!(index,i)
     end
 end
-
 
 matriz_embedded = real(vectores[:,index])
 arriba = matriz_embedded[1:nv(g),:]
@@ -92,12 +81,10 @@ end
 
 grupos = membresia(length(index),hola)
 
-comunidades = hcat(vertices(g),grupos)
-
-
-#print("$(length(cuantos))")
-
-writedlm("../Resultados/NBM_communities_$(la_red)",comunidades)
+if typeof(red[1,1]) != Int
+  comunidades = hcat(Nodes,grupos)
+else
+  comunidades = hcat(vertices(g),grupos)
 end
 
-
+writedlm("../Resultados/NBM_communities_$(a[1])",comunidades)

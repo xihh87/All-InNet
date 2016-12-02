@@ -4,6 +4,7 @@ run(`cowsay Frankie says RELAX`)
 
 using RCall
 
+
 function la_matriz(g)
     A = full(adjacency_matrix(g))
     ceros = zeros(A)

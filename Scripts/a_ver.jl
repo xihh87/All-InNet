@@ -14,32 +14,28 @@ end
 
 function la_NBM(g::SimpleGraph)
     edgeidmap = Dict{Edge, Int}()
+    aristas = ne(g)
     m = 0
     for e in edges(g)
         m += 1
         edgeidmap[e] = m
+	edgeidmap[reverse(e)] = m + aristas
     end
 
-    if !is_directed(g)
-        for e in edges(g)
-            m += 1
-            edgeidmap[reverse(e)] = m
-        end
-    end
-
-
-    B = spzeros(Float64, m, m)
+    B = spzeros(Float64, 2*aristas, 2*aristas)
 
 
     for (e,u) in edgeidmap
         i, j = src(e), dst(e)
-        for (e2,v) in edgeidmap
-          k, l = src(e2), dst(e2)
-          B[v,u] = (kron_δ(j,k)*(1-kron_δ(i,l)))*(1/(degree(g,j)))
+	eles = neighbors(g,j)
+	k = j
+        for l in eles
+          B[edgeidmap[k=>l],u] = (kron_δ(j,k)*(1-kron_δ(i,l)))*(1/(degree(g,j)))
         end
     end
     return B, edgeidmap
 end
+
 
 function contrae(g,v)
     y = zeros(Float64, nv(g))
